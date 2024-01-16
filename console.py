@@ -11,6 +11,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from datetime import datetime
 
 
 class HBNBCommand(cmd.Cmd):
@@ -113,10 +114,10 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         """Overrides the default behavior of emptyline in Cmd."""
         pass
-
+    
     def do_create(self, args):
         '''Create a new instance of class BaseModel and saves it
-        to the JSON file.'''
+            to the JSON file.'''
         if len(args) == 0:
             print("** class name missing **")
             return
@@ -177,7 +178,7 @@ class HBNBCommand(cmd.Cmd):
 
         key = c_name + "." + c_id
         try:
-            print(storage._FileStorage__objects[key])
+            print(storage.all()[key])
         except KeyError:
             print("** no instance found **")
 
@@ -228,12 +229,15 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            objects = storage.all(args)
+            for k, v in objects.items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            for cls_name in HBNBCommand.classes:
+                objects = storage.all(cls_name)
+                for k, v in objects.items():
+                    print_list.append(str(v))
 
         print(print_list)
 
