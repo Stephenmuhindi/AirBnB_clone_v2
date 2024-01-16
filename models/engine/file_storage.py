@@ -35,11 +35,11 @@ class FileStorage:
         """Loads storage dictionary from file"""
         try:
             temp = {}
-            from models import classes
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
                     class_name = val['__class__']
+                    from models import classes
                     model_class = classes.get(class_name)
                     if model_class:
                         key = "{}.{}".format(class_name, val['id'])
