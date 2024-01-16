@@ -3,6 +3,20 @@
 from os import getenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from models.base_model import BaseModel
+from models.user import User
+from models.place import Place
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
+
+# Dictionary of model classes
+mapped_classes = {"User": User, "BaseModel": BaseModel,
+           "Place": Place, "State": State,
+           "City": City, "Amenity": Amenity,
+           "Review": Review}
+
 
 
 class DBStorage():
@@ -20,6 +34,7 @@ class DBStorage():
                                                 getenv('HBNB_MYSQL_HOST'),
                                                 getenv('HBNB_MYSQL_DB')),
                                         pool_pre_ping=True)
+            Base.metadata.create_all(self.__engine)
         except Exception as e:
             print(f"Error connecting to the database: {e}")
 
@@ -29,12 +44,10 @@ class DBStorage():
             self.reload()
              
         objects = {}
-        from models import classes
-
         if isinstance(cls, str):
-            cls = classes.get(cls, None)
+            cls = mapped_classes.get(cls, None)
 
-        query_classes = [cls] if cls else classes.values()
+        query_classes = [cls] if cls else mapped_classes.values()
 
         for query_cls in query_classes:
             for obj in self.__session.query(query_cls):
