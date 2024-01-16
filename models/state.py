@@ -17,14 +17,15 @@ class State(BaseModel, Base):
 
     @property
     def cities(self):
-        import models
-        from models.city import City
         """returns the list of City instances with
         state_id equals to the current State.id"""
-        list_city = []
+        if getenv("HBNB_TYPE_STORAGE") != "db":
+            import models
+            from models.city import City
+            list_city = []
 
-        cities = models.storage.all(City)
-        for city in cities:
-            if cities[city].state_id == self.id:
-                list_city.append(cities[city])
-        return list_city
+            cities = models.storage.all(City)
+            for city in cities.values():
+                if city.state_id == self.id:
+                    list_city.append(city)
+            return list_city
