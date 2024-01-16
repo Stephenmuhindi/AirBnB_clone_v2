@@ -1,69 +1,70 @@
 #!/usr/bin/python3
-"""New engine DBStorage"""
+"""Database Storage Module"""
 from os import getenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+
 class DBStorage():
-    """An alternative storage to JSON"""
+    """Defines storage methods for the class"""
     __engine = None
     __session = None
 
     def __init__(self):
-        """Initializes the storage system"""
-        from models.base_model import Base
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
-                                      .format(getenv('HBNB_MYSQL_USER'),
-                                              getenv('HBNB_MYSQL_PWD'),
-                                              getenv('HBNB_MYSQL_HOST'),
-                                              getenv('HBNB_MYSQL_DB')),
-                                      pool_pre_ping=True)
-        if getenv('HBNB_ENV') == 'test':
-            Base.metadata.drop_all(self.__engine)
+        """Initialization of the class"""
+        try:
+            from models.base_model import Base
+            self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
+                                        .format(getenv('HBNB_MYSQL_USER'),
+                                                getenv('HBNB_MYSQL_PWD'),
+                                                getenv('HBNB_MYSQL_HOST'),
+                                                getenv('HBNB_MYSQL_DB')),
+                                        pool_pre_ping=True)
+        except Exception as e:
+            print(f"Error connecting to the database: {e}")
 
     def all(self, cls=None):
-        """Queries current database session"""
-        import models
-        class_list = []
-        if cls is None:
-            for key, value in models.classes.items():
-                class_list.append(value)
-        else:
-            if cls in models.classes.values():
-                class_list = [cls]
-        new_dict = {}
-        for search in class_list:
-            try:
-                saved_inst = self.__session.query(search).all()
-            except:
-                continue
-            for instance in saved_inst:
-                key = f"{instance.__class__.__name__}.{instance.id}"
-                new_dict[key] = instance.to_dict()
-        return new_dict
+        """Returns a dictionary of all the objects present."""
+        if not self.__session:
+            self.reload()
+             
+        objects = {}
+        from models import classes
+
+        if isinstance(cls, str):
+            cls = classes.get(cls, None)
+
+        query_classes = [cls] if cls else classes.values()
+
+        for query_cls in query_classes:
+            for obj in self.__session.query(query_cls):
+                key = f"{obj.__class__.__name__}.{obj.id}"
+                objects[key] = obj
+
+        return objects
 
     def new(self, obj):
-        '''adds the object to current db session'''
+        """Adds a new session to workflow"""
         self.__session.add(obj)
 
     def save(self):
-        '''commits all changes of the current db session'''
+        """Saves a session to the database"""
         self.__session.commit()
 
     def delete(self, obj=None):
-        '''deletes from current db session'''
+        """Deletes a session from the database"""
         if obj:
             self.__session.delete(obj)
             self.save()
 
     def reload(self):
-        '''creates all tables in database'''
+        """Reloads sessions to enable CRUD"""
         from models.base_model import Base
-        Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
         self.__session = scoped_session(session_factory)
 
     def close(self):
-        ''' Closes the current session and reloads the databases '''
+        """Brings a session to an end"""
         self.__session.remove()
+        

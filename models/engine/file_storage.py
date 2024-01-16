@@ -9,7 +9,7 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        '''returns the list of objects of one type of class'''
+        """Returns the list of objects of one type of class"""
         if cls:
             my_dict = {}
             for key, value in self.__objects.items():
@@ -20,43 +20,30 @@ class FileStorage:
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
-        self.all().update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
+        key = "{}.{}".format(type(obj).__name__, obj.id)
+        self.__objects[key] = obj
 
     def save(self):
         """Saves storage dictionary to file"""
         with open(FileStorage.__file_path, 'w') as f:
             temp = {}
-            temp.update(FileStorage.__objects)
-            for key, val in temp.items():
+            for key, val in self.__objects.items():
                 temp[key] = val.to_dict()
             json.dump(temp, f)
 
     def reload(self):
         """Loads storage dictionary from file"""
-        from models.base_model import BaseModel
-        from models.user import User
-        from models.place import Place
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.review import Review
-
-        classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
         try:
             temp = {}
+            from models import classes
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                        class_name = val['__class__']
-                        model_class = classes.get(class_name)
-                        if model_class:
-                            self.all()[key] = model_class(**val)
-                else:
-                    pass
+                    class_name = val['__class__']
+                    model_class = classes.get(class_name)
+                    if model_class:
+                        key = "{}.{}".format(class_name, val['id'])
+                        self.__objects[key] = model_class(**val)
         except FileNotFoundError:
             pass
 
@@ -64,8 +51,6 @@ class FileStorage:
         """Public instance method to delete obj from __objects
         if obj is equal to None, do nothing"""
         if obj is not None:
-            copy = dict(FileStorage.__objects)
-            for key, value in copy.items():
-                if value == obj:
-                    del FileStorage.__objects[key]
+            key = "{}.{}".format(type(obj).__name__, obj.id)
+            del self.__objects[key]
             self.save()
