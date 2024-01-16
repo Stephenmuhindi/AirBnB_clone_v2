@@ -24,25 +24,19 @@ class BaseModel:
                         default=datetime.utcnow)
 
     def __init__(self, *args, **kwargs):
-        """Instatntiates a new model"""
+        """Instantiate a new model."""
         if not kwargs:
             from models import storage
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now().isoformat()
-            self.updated_at = datetime.now().isoformat()
+            self.created_at = self.updated_at = datetime.utcnow()
         else:
-            kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')\
-                                                     .isoformat()
-            kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')\
-                                                     .isoformat()
-            del kwargs['__class__']
+            self.updated_at = datetime.strptime(kwargs.get('updated_at', datetime.now().isoformat()), '%Y-%m-%dT%H:%M:%S.%f').isoformat()
+            self.created_at = datetime.strptime(kwargs.get('created_at', datetime.now().isoformat()), '%Y-%m-%dT%H:%M:%S.%f').isoformat()
+
+            kwargs.pop('__class__', None)
 
             for key, value in kwargs.items():
-                '''Check if the attribute already exists, if not, create it'''
                 setattr(self, key, str(value))
-
 
     def __str__(self):
         """Returns a string representation of the instance"""
@@ -60,11 +54,11 @@ class BaseModel:
         """Convert instance into dict format"""
         dictionary = {}
         dictionary.update(self.__dict__)
+        dictionary.pop('_sa_instance_state', None)
         dictionary.update({'__class__':
                           (str(type(self)).split('.')[-1]).split('\'')[0]})
         dictionary['created_at'] = self.created_at.isoformat()
         dictionary['updated_at'] = self.updated_at.isoformat()
-        dictionary.pop('_sa_instance_state', None)
 
         return dictionary
     
