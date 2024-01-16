@@ -28,18 +28,20 @@ class BaseModel:
         if not kwargs:
             from models import storage
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
+            self.created_at = datetime.now().isoformat()
+            self.updated_at = datetime.now().isoformat()
         else:
             kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
+                                                     '%Y-%m-%dT%H:%M:%S.%f')\
+                                                     .isoformat()
             kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
+                                                     '%Y-%m-%dT%H:%M:%S.%f')\
+                                                     .isoformat()
             del kwargs['__class__']
 
             for key, value in kwargs.items():
                 '''Check if the attribute already exists, if not, create it'''
-                setattr(self, key, value)
+                setattr(self, key, str(value))
 
 
     def __str__(self):
