@@ -2,7 +2,7 @@
 """ Place Module for HBNB project """
 from models.base_model import BaseModel, Base
 from os import getenv
-from sqlalchemy import String, Column, ForeignKey, Integer, Float
+from sqlalchemy import String, Column, ForeignKey, Integer, Float, Table
 from sqlalchemy.orm import relationship
 
 
@@ -27,6 +27,13 @@ class Place(BaseModel, Base):
 
         reviews = relationship('Review', cascade='all, delete-orphan', backref='place')
 
+        amenities = relationship('Amenity',secondary='place_amenity',
+                                 back_populates='places', viewonly=False)
+        
+        place_amenity = Table('place_amenity', Base.metadata,
+                              Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False),
+                              Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False))
+
     else:
         city_id = ""
         user_id = ""
@@ -40,6 +47,10 @@ class Place(BaseModel, Base):
         longitude = 0.0
         amenity_ids = []
 
+    def __init__(self, *args, **kwargs):
+        """Initializes class Amenity"""
+        super().__init__(*args, **kwargs)
+
         @property
         def reviews(self):
             """Getter attribute that returns a list of Review instances
@@ -48,3 +59,24 @@ class Place(BaseModel, Base):
             from models.review import Review
             return [review for review in storage.all(Review).values()
                     if review.place_id == self.id]
+        
+        @property
+        def amenities(self):
+            """Getter attribute for amenities"""
+            from models import storage
+            from models.amenity import Amenity
+            amenities_list = []
+            for amenity_id in self.amenity_ids:
+                amenity = storage.get(Amenity, amenity_id)
+                if amenity:
+                    amenities_list.append(amenity)
+            return amenities_list
+
+        @amenities.setter
+        def amenities(self, amenity):
+            """Setter attribute for amenities"""
+            from models.amenity import Amenity
+            if isinstance(amenity, Amenity):
+                amenity_id = amenity.id
+                if amenity_id not in self.amenity_ids:
+                    self.amenity_ids.append(amenity_id)

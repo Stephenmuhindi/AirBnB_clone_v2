@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 """ State Module for HBNB project """
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from os import getenv
+import uuid
 
 
 class State(BaseModel, Base):
@@ -14,6 +15,10 @@ class State(BaseModel, Base):
         cities = relationship("City", cascade="all, delete-orphan", backref="state")
     else:
         name = ""
+
+    def __init__(self, *args, **kwargs):
+            """Initializes class Amenity"""
+            super().__init__(*args, **kwargs)
 
     @property
     def cities(self):
