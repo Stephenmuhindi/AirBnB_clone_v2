@@ -10,3 +10,9 @@ if getenv('HBNB_TYPE_STORAGE') == 'db':
 else:
     storage = FileStorage()
     storage.reload()
+
+from .state import State
+from .city import City
+from .user import User
+from .place import Place
+from .amenity import Amenity
