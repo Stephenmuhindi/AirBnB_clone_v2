@@ -30,8 +30,14 @@ class BaseModel:
             self.created_at = self.updated_at = datetime.utcnow()
         else:
             self.id = str(uuid.uuid4())
-            self.updated_at = datetime.strptime(kwargs.get('updated_at', datetime.now().isoformat()), '%Y-%m-%dT%H:%M:%S.%f').isoformat()
-            self.created_at = datetime.strptime(kwargs.get('created_at', datetime.now().isoformat()), '%Y-%m-%dT%H:%M:%S.%f').isoformat()
+            self.updated_at = datetime.strptime\
+                (kwargs.get('updated_at',
+                            datetime.now().isoformat()),
+                            '%Y-%m-%dT%H:%M:%S.%f').isoformat()
+            self.created_at = datetime.strptime\
+                (kwargs.get('created_at',
+                            datetime.now().isoformat()),
+                            '%Y-%m-%dT%H:%M:%S.%f').isoformat()
 
             kwargs.pop('__class__', None)
 
