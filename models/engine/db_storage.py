@@ -73,7 +73,6 @@ class DBStorage():
 
     def reload(self):
         """Reloads sessions to enable CRUD"""
-        from models.base_model import Base
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
         self.__session = scoped_session(session_factory)
