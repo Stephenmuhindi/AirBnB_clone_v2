@@ -35,6 +35,7 @@ class DBStorage():
                                                 getenv('HBNB_MYSQL_DB')),
                                         pool_pre_ping=True)
             Base.metadata.create_all(self.__engine)
+
         except Exception as e:
             print(f"Error connecting to the database: {e}")
 
