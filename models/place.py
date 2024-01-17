@@ -47,10 +47,6 @@ class Place(BaseModel, Base):
         longitude = 0.0
         amenity_ids = []
 
-    def __init__(self, *args, **kwargs):
-        """Initializes class Amenity"""
-        super().__init__(*args, **kwargs)
-
         @property
         def reviews(self):
             """Getter attribute that returns a list of Review instances
