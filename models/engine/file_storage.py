@@ -66,6 +66,5 @@ class FileStorage:
         """Public instance method to delete obj from __objects
         if obj is equal to None, do nothing"""
         if obj is not None:
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            del self.__objects[key]
+            del self.__objects[obj.__class__.__name__ + '.' + obj.id]
             self.save()
