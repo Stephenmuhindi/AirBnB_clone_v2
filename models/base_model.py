@@ -12,16 +12,17 @@ if getenv("HBNB_TYPE_STORAGE") == 'db':
 else:
     Base = object
 
+
 class BaseModel:
     """A base class for all hbnb models"""
     if getenv("HBNB_TYPE_STORAGE") == 'db':
         id = Column(String(60), nullable=False, primary_key=True)
         created_at = Column(DateTime,
-                        nullable=False,
-                        default=datetime.utcnow)
+                            nullable=False,
+                            default=datetime.utcnow)
         updated_at = Column(DateTime,
-                        nullable=False,
-                        default=datetime.utcnow)
+                            nullable=False,
+                            default=datetime.utcnow)
 
     def __init__(self, *args, **kwargs):
         """Instantiate a new model."""
@@ -29,14 +30,14 @@ class BaseModel:
         if not kwargs:
             self.created_at = self.updated_at = datetime.utcnow()
         else:
-            self.updated_at = datetime.strptime\
-                (kwargs.get('updated_at',
-                            datetime.now().isoformat()),
-                            '%Y-%m-%dT%H:%M:%S.%f').isoformat()
-            self.created_at = datetime.strptime\
-                (kwargs.get('created_at',
-                            datetime.now().isoformat()),
-                            '%Y-%m-%dT%H:%M:%S.%f').isoformat()
+            self.updated_at = \
+                datetime.strptime(kwargs.get('updated_at',
+                                             datetime.now().isoformat()),
+                                  '%Y-%m-%dT%H:%M:%S.%f').isoformat()
+            self.created_at = \
+                datetime.strptime(kwargs.get('created_at',
+                                             datetime.now().isoformat()),
+                                  '%Y-%m-%dT%H:%M:%S.%f').isoformat()
 
             kwargs.pop('__class__', None)
 
@@ -66,7 +67,7 @@ class BaseModel:
         dictionary['updated_at'] = self.updated_at.isoformat()
 
         return dictionary
-    
+
     def delete(self):
         """Delete current instance from storage by calling
         its delete method"""
