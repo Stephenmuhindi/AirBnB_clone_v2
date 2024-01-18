@@ -25,14 +25,22 @@ class Place(BaseModel, Base):
         user = relationship('User', back_populates='places')
         cities = relationship('City', back_populates='places')
 
-        reviews = relationship('Review', cascade='all, delete-orphan', backref='place')
+        reviews = \
+            relationship('Review', cascade='all, delete-orphan',
+                         backref='place')
 
-        amenities = relationship('Amenity',secondary='place_amenity',
+        amenities = relationship('Amenity', secondary='place_amenity',
                                  back_populates='places', viewonly=False)
-        
+
         place_amenity = Table('place_amenity', Base.metadata,
-                              Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False),
-                              Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False))
+                              Column('place_id', String(60),
+                                     ForeignKey('places.id'),
+                                     primary_key=True,
+                                     nullable=False),
+                              Column('amenity_id', String(60),
+                                     ForeignKey('amenities.id'),
+                                     primary_key=True,
+                                     nullable=False))
 
     else:
         city_id = ""
@@ -55,7 +63,7 @@ class Place(BaseModel, Base):
             from models.review import Review
             return [review for review in storage.all(Review).values()
                     if review.place_id == self.id]
-        
+
         @property
         def amenities(self):
             """Getter attribute for amenities"""

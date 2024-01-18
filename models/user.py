@@ -22,10 +22,9 @@ class User(BaseModel, Base):
         reviews = relationship('Review',
                                cascade='all,delete-orphan',
                                backref='user')
-        
+
     else:
         email = ''
         password = ''
         first_name = ''
         last_name = ''
-
