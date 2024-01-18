@@ -71,4 +71,4 @@ class FileStorage:
                 del self.__objects[key]
                 self.save()
         else:
-            exit(1)
+            pass
