@@ -47,7 +47,8 @@ class TestHBNBCommand(unittest.TestCase):
                 cons.onecmd('create User')
             # creating a User instance
             clear_stream(cout)
-            cons.onecmd('create User email="kakazablone@gmail.com" password="031"')
+            cons.onecmd('create User email=\
+                        "kakazablone@gmail.com" password="031"')
             mdl_id = cout.getvalue().strip()
             dbc = MySQLdb.connect(
                 host=os.getenv('HBNB_MYSQL_HOST'),
