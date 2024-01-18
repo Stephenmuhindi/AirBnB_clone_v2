@@ -13,10 +13,9 @@ from models.review import Review
 
 # Dictionary of model classes
 mapped_classes = {"User": User, "BaseModel": BaseModel,
-           "Place": Place, "State": State,
-           "City": City, "Amenity": Amenity,
-           "Review": Review}
-
+                  "Place": Place, "State": State,
+                  "City": City, "Amenity": Amenity,
+                  "Review": Review}
 
 
 class DBStorage():
@@ -29,11 +28,11 @@ class DBStorage():
         try:
             from models.base_model import Base
             self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
-                                        .format(getenv('HBNB_MYSQL_USER'),
-                                                getenv('HBNB_MYSQL_PWD'),
-                                                getenv('HBNB_MYSQL_HOST'),
-                                                getenv('HBNB_MYSQL_DB')),
-                                        pool_pre_ping=True)
+                                          .format(getenv('HBNB_MYSQL_USER'),
+                                                  getenv('HBNB_MYSQL_PWD'),
+                                                  getenv('HBNB_MYSQL_HOST'),
+                                                  getenv('HBNB_MYSQL_DB')),
+                                          pool_pre_ping=True)
             Base.metadata.create_all(self.__engine)
 
         except Exception as e:
@@ -43,7 +42,7 @@ class DBStorage():
         """Returns a dictionary of all the objects present."""
         if not self.__session:
             self.reload()
-             
+
         objects = {}
         if isinstance(cls, str):
             cls = mapped_classes.get(cls, None)
@@ -80,4 +79,3 @@ class DBStorage():
     def close(self):
         """Brings a session to an end"""
         self.__session.remove()
-        
