@@ -29,7 +29,6 @@ class BaseModel:
         if not kwargs:
             self.created_at = self.updated_at = datetime.utcnow()
         else:
-            self.id = str(uuid.uuid4())
             self.updated_at = datetime.strptime\
                 (kwargs.get('updated_at',
                             datetime.now().isoformat()),
