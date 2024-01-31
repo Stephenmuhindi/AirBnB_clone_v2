@@ -28,10 +28,12 @@ echo "$samba" | sudo tee /data/web_static/releases/test/index.html
 # Remove symbolic link if exists (-f) before creating a new one
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 # Configure Nginx to serve alias content
-sudo sed -i "\#server_name _;#a \
-        location /hbnb_static {\
-            alias /data/web_static/current/;\
-        }" /etc/nginx/sites-enabled/default
-
+if ! sudo grep -q "alias /data/web_static/current/;" /etc/nginx/sites-enabled/default; then
+    sudo sed -i "\#server_name _;#a \\
+        location /hbnb_static { \\
+            alias /data/web_static/current/; \\
+        } \\
+        "  /etc/nginx/sites-enabled/default
+fi
 sudo chown -R ubuntu:ubuntu /data/
 sudo service nginx reload
