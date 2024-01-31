@@ -10,10 +10,10 @@ sudo service nginx start
 # Create directories if they dont exist, -p ensures
 # parent dirs are created as well
 if [ ! -d "/data/web_static/releases/test/" ]; then
-    mkdir -p /data/web_static/releases/test/
+    sudo mkdir -p /data/web_static/releases/test/
 fi
 if [ ! -d "/data/web_static/shared/" ]; then
-    mkdir -p /data/web_static/shared/
+    sudo mkdir -p /data/web_static/shared/
 fi
 # Fake HTML file created
 samba="
