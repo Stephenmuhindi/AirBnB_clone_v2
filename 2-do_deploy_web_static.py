@@ -1,50 +1,41 @@
 #!/usr/bin/python3
 """
-Fabric script that distributes an archive to your web servers
+    script that distributes an archive to your web servers
 """
-
+import os.path
 from datetime import datetime
-from fabric.api import env, local, put, run
-import os
+from fabric.api import *
 
-env.hosts = ["52.91.121.146", "3.85.136.181"]
-env.user = "ubuntu"
+env.hosts = ['100.26.254.70', '34.201.174.4']
 
 
 def do_pack():
-    """
-    Compress web_static content into a tarball
-    """
-    local("mkdir -p versions")
+    """generationg a tgz file"""
     date = datetime.now().strftime("%Y%m%d%H%M%S")
-    archive_path = "versions/web_static_{}.tgz".format(date)
-    result = local("tar -cvzf {} web_static".format(archive_path))
-
-    return archive_path if result.succeeded else None
+    file_path = "versions/web_static_{}.tgz".format(date)
+    if os.path.isdir("versions") is False:
+        local(" mkdir versions")
+    local('tar -cvzf ' + file_path + ' web_static')
+    if os.path.exists(file_path):
+        return file_path
+    return None
 
 
 def do_deploy(archive_path):
-    """
-    Distribute archive to web servers
-    """
-    if os.path.exists(archive_path):
-        remote_path = "/data/web_static/releases/"
-        release_folder = "{}{}".format
-        (remote_path, archive_path.split("/")[-1][:-4])
-
-        put(archive_path, "/tmp/")
-        run("sudo mkdir -p {}".format(release_folder))
-        run("sudo tar -xzf /tmp/{} -C {}/".format
-            (archive_path.split("/")[-1], release_folder))
-        run("sudo rm /tmp/{}".format
-            (archive_path.split("/")[-1]))
-        run("sudo mv {}/web_static/* {}/".format
-            (release_folder, release_folder))
-        run("sudo rm -rf {}/web_static".format(release_folder))
-        run("sudo rm -rf /data/web_static/current")
-        run("sudo ln -s {} /data/web_static/current".format(release_folder))
-
-        print("New version deployed!")
-        return True
-
-    return False
+    """distributes an archive to your web servers"""
+    if os.path.exists(archive_path) is False:
+        return False
+    archive_name = archive_path.split('/')[1]
+    arch_mod = archive_name.split(".")[0]
+    remote_path = "/data/web_static/releases/" + arch_mod
+    upload_path = '/tmp/' + archive_name
+    put(archive_path, upload_path)
+    run('mkdir -p ' + remote_path)
+    run('tar -xzf /tmp/{} -C {}/'.format(archive_name, remote_path))
+    run('rm {}'.format(upload_path))
+    mv = 'mv ' + remote_path + '/web_static/* ' + remote_path + '/'
+    run(mv)
+    run('rm -rf ' + remote_path + '/web_static')
+    run('rm -rf /data/web_static/current')
+    run('ln -s ' + remote_path + ' /data/web_static/current')
+    return True
