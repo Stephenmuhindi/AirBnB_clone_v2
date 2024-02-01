@@ -21,8 +21,8 @@ def do_pack():
         local("tar -cvzf {} -C web_static/ .".format(archive_path))
         return archive_path
 
-    except Exception as e:
-        pass
+    except:
+        return None
 
 
 def do_deploy(archive_path):
