@@ -25,23 +25,30 @@ def do_pack():
         pass
 
 def do_deploy(archive_path):
-    """Distribute archive."""
+    """Distributes an archive to web servers."""
     if exists(archive_path):
-        archived_file = archive_path[9:]
-        newest_version = "/data/web_static/releases/" + archived_file[:-4]
-        archived_file = "/tmp/" + archived_file
-        put(archive_path, "/tmp/")
-        sudo("mkdir -p {}".format(newest_version))
-        sudo("tar -xzf {} -C {}/".format(archived_file,
-                                             newest_version))
-        sudo("rm {}".format(archived_file))
-        sudo("mv {}/web_static/* {}".format(newest_version,
-                                                newest_version))
-        sudo("rm -rf {}/web_static".format(newest_version))
+        archive_filename = archive_path.split("/")[-1]
+        without_ext = archive_filename.split(".")[0]
+        tmp_path = "/tmp/" + archive_filename
+        new_version = "/data/web_static/releases/" + without_ext
+
+        # Upload the archive to the /tmp/ directory of the web server
+        put(archive_path, tmp_path)
+        sudo("mkdir -p {}".format(new_version))
+
+        sudo("tar -xzf {} -C {}".format(tmp_path, new_version))
+        sudo("rm {}".format(tmp_path))
+
+        # Move contents of web_static to the release directory
+        sudo("mv {}/web_static/* {}".format(new_version, new_version))
+        # Remove the web_static directory
+        sudo("rm -rf {}/web_static".format(new_version))
+
         sudo("rm -rf /data/web_static/current")
-        sudo("ln -s {} /data/web_static/current".format(newest_version))
+        # Create a new symbolic link
+        sudo("ln -s {} /data/web_static/current".format(new_version))
 
         print("New version deployed!")
         return True
-
-    return False
+    else:
+        return False
