@@ -29,12 +29,12 @@ def do_deploy(archive_path):
     your web servers,"""
 
     if exists(archive_path):
-        new_archive_path = '/tmp/' + archive_path.split("/")[1]
+        new_archive_path = archive_path.split("/")[1]
         newest_version = "/data/web_static/releases/" + new_archive_path[:-4]
 
         put(archive_path, "/tmp/")
         sudo("mkdir -p {}".format(newest_version))
-        sudo("tar -xzf {} -C {}/".format(new_archive_path,
+        sudo("tar -xzf {} -C {}/".format('/tmp/' + new_archive_path,
                                              newest_version))
         sudo("rm {}".format(new_archive_path))
         sudo("mv {}/web_static/* {}".format(newest_version,
