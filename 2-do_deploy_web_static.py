@@ -3,7 +3,7 @@
 the web_static folder"""
 
 import time
-from fabric.api import local, put, env, sudo, cd
+from fabric.api import local, put, env, sudo
 from os.path import exists
 
 env.hosts = ["100.25.102.191", "100.26.161.26"]
@@ -28,7 +28,7 @@ def do_pack():
 def do_deploy(archive_path):
     """Distributes an archive to web servers."""
     if exists(archive_path):
-        archive_filename = archive_path.split("/")[-1]
+        archive_filename = archive_path.split("/")[1]
         without_ext = archive_filename.split(".")[0]
         tmp_path = "/tmp/" + archive_filename
         new_version = "/data/web_static/releases/" + without_ext
