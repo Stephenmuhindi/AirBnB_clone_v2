@@ -18,7 +18,7 @@ def do_pack():
         local("mkdir -p versions")
 
     start_path = "versions/web_static_{}.tgz".format(timestamp)
-    archive_path = local("tar -cvzf {} -C web_static/ .".format(start_path))
+    archive_path = local("tar -cvzf {} web_static".format(start_path))
 
     if archive_path.succeeded:
         return start_path
@@ -27,7 +27,7 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """Distribute archive"""
+    """Distribute archive file to the server(s)"""
     if exists(archive_path):
         archived_file = archive_path[9:]
         newest_version = "/data/web_static/releases/" + archived_file[:-4]
