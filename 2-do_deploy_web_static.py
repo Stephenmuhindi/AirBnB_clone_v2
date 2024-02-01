@@ -24,9 +24,6 @@ def do_pack():
         return start_path
     else:
         None
-    
-
-
 
 
 def do_deploy(archive_path):
@@ -43,7 +40,7 @@ def do_deploy(archive_path):
         sudo("tar -xzf {} -C {}".format(archive_filename, new_version))
         sudo("rm {}".format(tmp_path))
         sudo("mv {}/web_static/* {}".format(new_version,
-                                                new_version))
+                                            new_version))
         sudo("rm -rf {}/web_static".format(new_version))
         sudo("rm -rf /data/web_static/current")
         # Create a new symbolic link
