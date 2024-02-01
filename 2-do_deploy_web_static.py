@@ -24,6 +24,7 @@ def do_pack():
     except Exception as e:
         pass
 
+
 def do_deploy(archive_path):
     """Distributes an archive to web servers."""
     if exists(archive_path):
