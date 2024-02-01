@@ -39,12 +39,7 @@ def do_deploy(archive_path):
 
         sudo("tar -xzf {} -C {}".format(tmp_path, new_version))
         sudo("rm {}".format(tmp_path))
-
-        # Move contents of web_static to the release directory
-        sudo("mv {}/web_static/* {}".format(new_version, new_version))
-        # Remove the web_static directory
-        sudo("rm -rf {}/web_static".format(new_version))
-
+        
         sudo("rm -rf /data/web_static/current")
         # Create a new symbolic link
         sudo("ln -s {} /data/web_static/current".format(new_version))
