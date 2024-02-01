@@ -1,41 +1,45 @@
 #!/usr/bin/python3
-"""
-    script that distributes an archive to your web servers
-"""
-import os.path
+"""Fabric script that distributes an archive to your web servers"""
 from datetime import datetime
 from fabric.api import *
+import os
 
-env.hosts = ['100.26.254.70', '34.201.174.4']
+env.hosts = ["100.25.102.191", "100.26.161.26"]
+env.user = "ubuntu"
 
 
 def do_pack():
-    """generationg a tgz file"""
+    """Generates a .tgz archive from the contents of the web_static"""
+
+    local("mkdir -p versions")
     date = datetime.now().strftime("%Y%m%d%H%M%S")
-    file_path = "versions/web_static_{}.tgz".format(date)
-    if os.path.isdir("versions") is False:
-        local(" mkdir versions")
-    local('tar -cvzf ' + file_path + ' web_static')
-    if os.path.exists(file_path):
-        return file_path
-    return None
+    start_path = "versions/web_static_{}.tgz".format(date)
+    archived_path = local("tar -cvzf {} web_static".format(start_path))
+
+    if archived_path.succeeded:
+        return start_path
+    else:
+        return None
 
 
 def do_deploy(archive_path):
-    """distributes an archive to your web servers"""
-    if os.path.exists(archive_path) is False:
-        return False
-    archive_name = archive_path.split('/')[1]
-    arch_mod = archive_name.split(".")[0]
-    remote_path = "/data/web_static/releases/" + arch_mod
-    upload_path = '/tmp/' + archive_name
-    put(archive_path, upload_path)
-    run('mkdir -p ' + remote_path)
-    run('tar -xzf /tmp/{} -C {}/'.format(archive_name, remote_path))
-    run('rm {}'.format(upload_path))
-    mv = 'mv ' + remote_path + '/web_static/* ' + remote_path + '/'
-    run(mv)
-    run('rm -rf ' + remote_path + '/web_static')
-    run('rm -rf /data/web_static/current')
-    run('ln -s ' + remote_path + ' /data/web_static/current')
-    return True
+    """Distribute archive to web servers"""
+    if os.path.exists(archive_path):
+        archived_file = archive_path[9:]
+        new_version = "/data/web_static/releases/" + archived_file[:-4]
+        archived_file = "/tmp/" + archived_file
+        put(archive_path, "/tmp/")
+        run("sudo mkdir -p {}".format(new_version))
+        run("sudo tar -xzf {} -C {}/".format(archived_file,
+                                             new_version))
+        run("sudo rm {}".format(archived_file))
+        run("sudo mv {}/web_static/* {}".format(new_version,
+                                                new_version))
+        run("sudo rm -rf {}/web_static".format(new_version))
+        run("sudo rm -rf /data/web_static/current")
+        run("sudo ln -s {} /data/web_static/current".format(new_version))
+
+        print("New version deployed!")
+        return True
+
+    return False
