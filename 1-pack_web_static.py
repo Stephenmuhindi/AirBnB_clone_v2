@@ -10,13 +10,14 @@ from os.path import exists
 def do_pack():
     """Adds all files in the folder web_static to the final archive"""
     timestamp = time.strftime("%Y%m%d%H%M%S")
-    try:
-        if not exists("versions"):
-            local("mkdir -p versions")
 
-        archive_path = "versions/web_static_{}.tgz".format(timestamp)
-        local("tar -cvzf {} -C web_static/ .".format(archive_path))
-        return archive_path
+    if not exists("versions"):
+        local("mkdir -p versions")
 
-    except Exception as e:
-        pass
+    start_path = "versions/web_static_{}.tgz".format(timestamp)
+    archive_path = local("tar -cvzf {} -C web_static/ .".format(start_path))
+    
+    if archive_path.succeeded:
+        return start_path
+    else:
+        None
