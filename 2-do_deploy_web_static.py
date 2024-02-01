@@ -1,34 +1,37 @@
 #!/usr/bin/python3
-"""Generates a .tgz archive from the contents of
-the web_static folder"""
+"""
+Fabric script that distributes an archive to your web servers
+"""
 
 from datetime import datetime
 from fabric.api import *
-from os.path import exists
+import os
 
-env.hosts = ["100.25.102.191", "100.26.161.26"]
+env.hosts = ["52.91.121.146", "3.85.136.181"]
 env.user = "ubuntu"
 
 
 def do_pack():
-    """Adds all files in the folder web_static to the final archive"""
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    """
+        return the archive path if archive has generated correctly.
+    """
 
-    if not exists("versions"):
-        local("mkdir -p versions")
+    local("mkdir -p versions")
+    date = datetime.now().strftime("%Y%m%d%H%M%S")
+    archived_f_path = "versions/web_static_{}.tgz".format(date)
+    t_gzip_archive = local("tar -cvzf {} web_static".format(archived_f_path))
 
-    start_path = "versions/web_static_{}.tgz".format(timestamp)
-    archive_path = local("tar -cvzf {} web_static".format(start_path))
-
-    if archive_path.succeeded:
-        return start_path
+    if t_gzip_archive.succeeded:
+        return archived_f_path
     else:
-        None
+        return None
 
 
 def do_deploy(archive_path):
-    """Distribute archive file to the server(s)"""
-    if exists(archive_path):
+    """
+        Distribute archive.
+    """
+    if os.path.exists(archive_path):
         archived_file = archive_path[9:]
         newest_version = "/data/web_static/releases/" + archived_file[:-4]
         archived_file = "/tmp/" + archived_file
