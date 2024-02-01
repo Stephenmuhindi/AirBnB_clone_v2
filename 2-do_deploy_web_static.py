@@ -25,47 +25,23 @@ def do_pack():
         pass
 
 def do_deploy(archive_path):
-    """Deploys the tar archive to the server and unpacks it"""
-    dir_name = archive_path.split("/")[1]
-    if not exists(archive_path):
-        return False
+    """Distribute archive."""
+    if exists(archive_path):
+        archived_file = archive_path[9:]
+        newest_version = "/data/web_static/releases/" + archived_file[:-4]
+        archived_file = "/tmp/" + archived_file
+        put(archive_path, "/tmp/")
+        sudo("mkdir -p {}".format(newest_version))
+        sudo("tar -xzf {} -C {}/".format(archived_file,
+                                             newest_version))
+        sudo("rm {}".format(archived_file))
+        sudo("mv {}/web_static/* {}".format(newest_version,
+                                                newest_version))
+        sudo("rm -rf {}/web_static".format(newest_version))
+        sudo("rm -rf /data/web_static/current")
+        sudo("ln -s {} /data/web_static/current".format(newest_version))
 
-    upload_file = put(archive_path, "/tmp/")
-    if upload_file.failed:
-        return False
+        print("New version deployed!")
+        return True
 
-    create_dir = sudo("mkdir -p /data/web_static/releases/{}".
-                     format(dir_name[:-4]))
-    if create_dir.failed:
-        return False
-
-    unpack = sudo("tar -xzf /tmp/{} -C /data/web_static/releases/{}".
-                 format(dir_name, dir_name[:-4]))
-    if unpack.failed:
-        return False
-
-    rm_dir = sudo("rm /tmp/{}".format(dir_name))
-    if rm_dir.failed:
-        return False
-
-    move_file = sudo("mv /data/web_static/releases/{}/web_static/* \
-                    /data/web_static/releases/{}/".
-                    format(dir_name[:-4], dir_name[:-4]))
-    if move_file.failed:
-        return False
-
-    rm_not_needed = sudo("rm -rf /data/web_static/releases/{}/web_static/".
-                        format(dir_name[:-4]))
-    if rm_not_needed.failed:
-        return False
-
-    rm_sym = sudo("rm /data/web_static/current")
-    if rm_sym.failed:
-        return False
-
-    make_sym = sudo("ln -sf /data/web_static/releases/{} \
-                   /data/web_static/current".format(dir_name[:-4]))
-    if make_sym.failed:
-        return False
-
-    return True
+    return False
