@@ -2,8 +2,8 @@
 """Generates a .tgz archive from the contents of
 the web_static folder"""
 
-import time
-from fabric.api import local, put, env, sudo
+from datetime import datetime
+from fabric.api import *
 from os.path import exists
 
 env.hosts = ["100.25.102.191", "100.26.161.26"]
@@ -12,7 +12,7 @@ env.user = "ubuntu"
 
 def do_pack():
     """Adds all files in the folder web_static to the final archive"""
-    timestamp = time.strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     if not exists("versions"):
         local("mkdir -p versions")
@@ -35,7 +35,7 @@ def do_deploy(archive_path):
         new_version = "/data/web_static/releases/" + without_ext
 
         # Upload the archive to the /tmp/ directory of the web server
-        put(archive_path, tmp_path)
+        put(archive_filename, tmp_path)
         sudo("mkdir -p {}".format(new_version))
         sudo("tar -xzf {} -C {}".format(archive_filename, new_version))
         sudo("rm {}".format(tmp_path))
