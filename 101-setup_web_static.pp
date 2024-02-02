@@ -1,42 +1,89 @@
 # Puppet Manifest that configures a server in 
 # readiness for deployment
+
+# Nginx configuration file
+$nginx_conf = "server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    add_header X-Served-By ${hostname};
+    root   /var/www/html;
+    index  index.html index.htm;
+    location /hbnb_static {
+        alias /data/web_static/current;
+        index index.html index.htm;
+    }
+    location /redirect_me {
+        return 301 http://github.com/Kakazablone/;
+    }
+    error_page 404 /404.html;
+    location /404 {
+      root /var/www/html;
+      internal;
+    }
+}"
+
 package { 'nginx':
-  ensure  => 'present',
-  require => Exec['update_apt_store'],
-}
-
-exec { 'update_apt_store':
-  command => '/usr/bin/apt-get update',
-}
-
+  ensure   => 'present',
+  provider => 'apt'
+} ->
 
 file { '/data':
-  ensure  => 'directory',
-  require => Package['nginx']
-} 
+  ensure  => 'directory'
+} ->
+
 file { '/data/web_static':
-  ensure  => 'directory',
-  require => File['/data']
-} -> file { '/data/web_static/releases':
-  ensure => 'directory',
-} -> file { '/data/web_static/releases/test':
-  ensure => 'directory',
-} -> file { '/data/web_static/shared':
-  ensure => 'directory',
-} -> file { '/data/web_static/releases/test/index.html':
+  ensure => 'directory'
+} ->
+
+file { '/data/web_static/releases':
+  ensure => 'directory'
+} ->
+
+file { '/data/web_static/releases/test':
+  ensure => 'directory'
+} ->
+
+file { '/data/web_static/shared':
+  ensure => 'directory'
+} ->
+
+file { '/data/web_static/releases/test/index.html':
   ensure  => 'present',
-  content => "Holberton School Puppet\n",
-} -> file { '/data/web_static/current':
+  content => "Holberton School Puppet\n"
+} ->
+
+file { '/data/web_static/current':
   ensure => 'link',
-  target => '/data/web_static/releases/test',
-} -> exec { 'chown -R ubuntu:ubuntu /data/':
-  path => '/usr/bin/:/usr/local/bin/:/bin/',
-} -> file_line { 'add_hbnb_static_location':
-  path    => '/etc/nginx/sites-enabled/default',
-  line    => '        location /hbnb_static {',
-  match   => '#server_name _;',
-  after   => '#a',
-  content => '            alias /data/web_static/current/;',
-} -> exec { 'restart_nginx':
-  command => '/usr/sbin/service nginx restart',
+  target => '/data/web_static/releases/test'
+} ->
+
+exec { 'chown -R ubuntu:ubuntu /data/':
+  path => '/usr/bin/:/usr/local/bin/:/bin/'
+}
+
+file { '/var/www':
+  ensure => 'directory'
+} ->
+
+file { '/var/www/html':
+  ensure => 'directory'
+} ->
+
+file { '/var/www/html/index.html':
+  ensure  => 'present',
+  content => "Holberton School Nginx\n"
+} ->
+
+file { '/var/www/html/404.html':
+  ensure  => 'present',
+  content => "Ceci n'est pas une page\n"
+} ->
+
+file { '/etc/nginx/sites-available/default':
+  ensure  => 'present',
+  content => $nginx_conf
+} ->
+
+exec { 'nginx restart':
+  path => '/etc/init.d/'
 }
