@@ -2,9 +2,9 @@
 """Generates a .tgz archive from the contents of
 the web_static folder"""
 
-import time
-from fabric.api import local
+from fabric.api import local, run
 from os.path import exists
+import time
 
 
 def do_pack():
@@ -14,10 +14,10 @@ def do_pack():
     if not exists("versions"):
         local("mkdir -p versions")
 
-    start_path = "versions/web_static_{}.tgz".format(timestamp)
-    archive_path = local("tar -cvzf {} web_static".format(start_path))
+    archived_path = "versions/web_static_{}.tgz".format(timestamp)
+    start_path = local("tar -cvzf {} web_static".format(archived_path))
 
-    if archive_path.succeeded:
-        return start_path
+    if start_path.succeeded:
+        return archived_path
     else:
         None
