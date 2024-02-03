@@ -12,10 +12,11 @@ def do_clean(number=0):
     number = 1 if int(number) == 0 else int(number)
 
     with lcd("versions"):
-        local_archives = sorted(os.listdir("."))
-        [local("rm ./{}".format(arch)) for arch in local_archives[:-number]]
+        archives = sorted(os.listdir("."))
+        archives_to_remove = archives[:-number]
+        [local("rm {}".format(archive)) for archive in archives_to_remove]
 
     with cd("/data/web_static/releases"):
-        remote_archives = run("ls -tr").split()
-        remote_archives = [arch for arch in remote_archives if "web_static_" in arch]
-        [run("rm -rf ./{}".format(arch)) for arch in remote_archives[:-number]]
+        archives = run("ls -tr | grep 'web_static_'").split()
+        archives_to_remove = archives[:-number]
+        [run("rm -rf {}".format(archive)) for archive in archives_to_remove]
