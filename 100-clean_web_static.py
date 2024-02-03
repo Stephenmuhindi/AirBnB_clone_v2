@@ -15,7 +15,11 @@ def do_clean(number=0):
     releases_directory = "/data/web_static/releases"
 
     version_archives = sorted(os.listdir('versions'))
-    [version_archives.pop() for _ in range(number)]
+    for _ in range(number):
+        if version_archives:
+            version_archives.pop()
+        else:
+            pass
     with lcd('versions'):
         [local("rm ./{}".format(archive)) for archive in version_archives]
 
