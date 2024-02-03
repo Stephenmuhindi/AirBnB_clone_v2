@@ -3,10 +3,12 @@ import os
 from fabric.api import env, lcd, cd, local, run
 
 env.hosts = ['100.25.102.191', '100.26.162.26']
+env.user = 'ubuntu'
+env.key_filename = '~/.ssh/school'
 
 
 def do_clean(number=0):
-    """Delete out-of-date archives both localy and 
+    """Delete out-of-date archives both localy and
     remotely"""
 
     number = 1 if int(number) == 0 else int(number)
