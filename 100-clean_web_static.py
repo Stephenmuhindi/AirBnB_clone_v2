@@ -19,7 +19,8 @@ def do_clean(number=0):
         [local("rm ./{}".format(archive)) for archive in version_archives]
 
     with cd(releases_directory):
-        release_archives = run("ls -tr").split()
+        release_archives = run('ls -tr').split()
         release_archives = [a for a in release_archives if "web_static_" in a]
         release_archives = release_archives[:-number]
-        [run("rm -rf ./{}".format(archive)) for archive in release_archives]
+        [run("sudo rm -rf ./{}".
+             format(archive)) for archive in release_archives]
