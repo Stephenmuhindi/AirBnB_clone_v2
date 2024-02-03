@@ -6,6 +6,7 @@ from os.path import exists
 
 env.hosts = ["100.25.102.191", "100.26.161.26"]
 env.user = "ubuntu"
+env.key_filename = '~/.ssh/school'
 
 
 def do_deploy(archive_path):
