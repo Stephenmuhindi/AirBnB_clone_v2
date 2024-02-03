@@ -17,7 +17,7 @@ def do_deploy(archive_path):
         # Upload archive
         put(archive_path, '/tmp/')
 
-        timestamp = archive_path[-1].split('.')[0]
+        timestamp = archive_path.split('.')[0][-14:]
         sudo('mkdir -p /data/web_static/releases/web_static_{}/'.format(timestamp))
 
         # Uncompress archive, delete archive, Move files into Host
