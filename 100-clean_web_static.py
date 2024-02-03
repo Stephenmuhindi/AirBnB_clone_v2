@@ -11,7 +11,7 @@ env.key_filename = '~/.ssh/school'
 def do_clean(number=0):
     """Delete out-of-date archives both localy and
     remotely"""
-
+    number = 1 if int(number) == 0 else int(number)
     releases_directory = "/data/web_static/releases"
 
     version_archives = sorted(os.listdir('versions'))
