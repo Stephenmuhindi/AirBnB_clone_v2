@@ -26,5 +26,9 @@ def do_clean(number=0):
     with cd(releases_directory):
         release_archives = run("ls -tr").split()
         release_archives = [a for a in release_archives if "web_static_" in a]
-        [release_archives.pop() for _ in range(number)]
+        for _ in range(number):
+            if release_archives:
+                release_archives.pop()
+            else:
+                pass
         [run("rm -rf ./{}".format(archive)) for archive in release_archives]
