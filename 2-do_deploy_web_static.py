@@ -36,4 +36,4 @@ def do_deploy(archive_path):
     sudo('rm -rf /data/web_static/current')
     sudo('ln -s /data/web_static/releases/web_static_{}/ \
          /data/web_static/current'.format(timestamp))
-    sudo('cp /data/web_static/current/* /var/www/html/')
+    sudo('cp -r /data/web_static/current/* /var/www/html/')
