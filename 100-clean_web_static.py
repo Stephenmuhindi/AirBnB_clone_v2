@@ -11,14 +11,15 @@ def do_clean(number=0):
     """Delete out-of-date archives both localy and
     remotely"""
 
-    number = 1 if int(number) == 0 else int(number)
+    releases_directory = "/data/web_static/releases"
 
-    with lcd("versions"):
-        archives = sorted(os.listdir("."))
-        archives_to_remove = archives[:-number]
-        [local("rm {}".format(archive)) for archive in archives_to_remove]
+    version_archives = sorted(os.listdir('versions'))
+    [version_archives.pop() for _ in range(number)]
+    with lcd('versions'):
+        [local("rm ./{}".format(archive)) for archive in version_archives]
 
-    with cd("/data/web_static/releases"):
-        archives = run("ls -tr | grep 'web_static_'").split()
-        archives_to_remove = archives[:-number]
-        [run("rm -rf {}".format(archive)) for archive in archives_to_remove]
+    with cd(releases_directory):
+        release_archives = run("ls -tr").split()
+        release_archives = [a for a in release_archives if "web_static_" in a]
+        [release_archives.pop() for _ in range(number)]
+        [run("rm -rf ./{}".format(archive)) for archive in release_archives]
