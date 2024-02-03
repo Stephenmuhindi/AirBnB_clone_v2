@@ -18,7 +18,6 @@ def do_deploy(archive_path):
     put(archive_path, '/tmp/')
 
     timestamp = archive_path.split('.')[0][-14:]
-    print(timestamp)
     sudo('mkdir -p /data/web_static/releases/web_static_{}/'.format(timestamp))
 
     # Uncompress archive, delete archive, Move files into Host
@@ -37,3 +36,4 @@ def do_deploy(archive_path):
     sudo('rm -rf /data/web_static/current')
     sudo('ln -s /data/web_static/releases/web_static_{}/ \
          /data/web_static/current'.format(timestamp))
+    sudo('cp /data/web_static/current/* /var/www/html/')
