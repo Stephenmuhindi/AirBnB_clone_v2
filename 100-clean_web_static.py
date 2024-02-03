@@ -14,21 +14,12 @@ def do_clean(number=0):
     number = 1 if int(number) == 0 else int(number)
     releases_directory = "/data/web_static/releases"
 
-    version_archives = sorted(os.listdir('versions'))
-    for _ in range(number):
-        if version_archives:
-            version_archives.pop()
-        else:
-            pass
+    version_archives = sorted(os.listdir('versions'))[:-number]
     with lcd('versions'):
         [local("rm ./{}".format(archive)) for archive in version_archives]
 
     with cd(releases_directory):
         release_archives = run("ls -tr").split()
         release_archives = [a for a in release_archives if "web_static_" in a]
-        for _ in range(number):
-            if release_archives:
-                release_archives.pop()
-            else:
-                pass
+        release_archives = release_archives[:-number]
         [run("rm -rf ./{}".format(archive)) for archive in release_archives]
