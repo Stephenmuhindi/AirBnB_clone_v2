@@ -11,7 +11,7 @@ env.hosts = ['18.207.1.87', '52.206.189.175']
 
 @runs_once
 def do_pack():
-    """ 
+    """
     class definition
     """
     formatted_dt = datetime.now().strftime('%Y%m%d%H%M%S')
