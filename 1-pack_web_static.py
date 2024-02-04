@@ -1,23 +1,20 @@
 #!/usr/bin/python3
-"""Generates a .tgz archive from the contents of
-the web_static folder"""
+"""
+dev .tgz archive from web_static
+"""
+from fabric.api import task, local
+from datetime import datetime
 
-from fabric.api import local, run
-from os.path import exists
-import time
 
-
+@task
 def do_pack():
-    """Adds all files in the folder web_static to the final archive"""
-    timestamp = time.strftime("%Y%m%d%H%M%S")
-
-    if not exists("versions"):
-        local("mkdir -p versions")
-
-    archived_path = "versions/web_static_{}.tgz".format(timestamp)
-    start_path = local("tar -cvzf {} web_static".format(archived_path))
-
-    if start_path.succeeded:
-        return archived_path
-    else:
-        None
+    """
+    function ya number 1
+    """
+    formatted_dt = datetime.now().strftime('%Y%m%d%H%M%S')
+    mkdir = "mkdir -p versions"
+    path = "versions/web_static_{}.tgz".format(formatted_dt)
+    print("Packing web_static to {}".format(path))
+    if local("{} && tar -cvzf {} web_static".format(mkdir, path)).succeeded:
+        return path
+    return None
