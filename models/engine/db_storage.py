@@ -1,85 +1,96 @@
 #!/usr/bin/python3
-''' kisononoi'''
-import os
-from models.base_model import BaseModel, Base
-from sqlalchemy import MetaData
+"""
+clone
+"""
 from models.user import User
+from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
-from models.place import Place
 from models.review import Review
-from sqlalchemy import (create_engine)
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import scoped_session
+from models.base_model import Base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from os import getenv
 
 
 class DBStorage:
-
-    '''
-    db eb
-    '''
+    """
+    Class method
+    """
 
     __engine = None
     __session = None
 
     def __init__(self):
-        ''' engine '''
-        env = os.getenv('HBNB_ENV')
-        user = os.getenv('HBNB_MYSQL_USER')
-        pwd = os.getenv('HBNB_MYSQL_PWD')
-        host = os.getenv('HBNB_MYSQL_HOST')
-        db = os.getenv('HBNB_MYSQL_DB')
+        """
+        engine start
+        """
+        hb_user = getenv("HBNB_MYSQL_USER")
+        hb_pwd = getenv("HBNB_MYSQL_PWD")
+        hb_host = getenv("HBNB_MYSQL_HOST")
+        hb_db = getenv("HBNB_MYSQL_DB")
+        hb_env = getenv("HBNB_ENV")
 
         self.__engine = create_engine(
-            'mysql+mysqldb://{}:{}@{}/{}'.format(
-                user, pwd, host, db, pool_pre_ping=True))
-        Base.metadata.create_all(self.__engine)
-        if env == 'test':
+            f"mysql+mysqldb://{hb_user}:{hb_pwd}@{hb_host}/{hb_db}",
+            pool_pre_ping=True,
+        )
+
+        if hb_env == "test":
             Base.metadata.drop_all(self.__engine)
 
-        Session = sessionmaker(bind=self.__engine)
-        self.__session = Session()
+    def reload(self):
+        """
+        reload methodoloy
+        """
+        Base.metadata.create_all(self.__engine)
+        Session = scoped_session(
+            sessionmaker(bind=self.__engine, expire_on_commit=False)
+        )
+        self.__session = Session
 
     def all(self, cls=None):
-        '''
-        if cls not specified, returns all classes
-        '''
+        """
+        query all
+        """
+        allClasses = [User, Place, State, City, Amenity, Review]
         result = {}
-        if cls:
-            for obj in self.__session.query(eval(cls)).all():
-                key = "{}.{}".format(obj.__class__.__name__, obj.id)
-                result[key] = obj
+        if cls is not None:
+            for obj in self.__session.query(cls).all():
+                ClassName = obj.__class__.__name__
+                keyName = ClassName + "." + obj.id
+                result[keyName] = obj
         else:
-            for sub_c in Base.__subclasses__():
-                table = self.__session.query(sub_c).all()
-                for obj in table:
-                    key = "{}.{}".format(obj.__class__.__name__, obj.id)
-                    result[key] = obj
-        return(result)
+            for clss in allClasses:
+                for obj in self.__session.query(clss).all():
+                    ClassName = obj.__class__.__name__
+                    keyName = ClassName + "." + obj.id
+                    result[keyName] = obj
+        return result
 
     def new(self, obj):
+        """
+        add new
+        """
         if obj:
-            try:
-                self.__session.add(obj)
-            except:
-                pass
+            self.__session.add(obj)
+
+    def save(self):
+        """
+        all changes
+        """
+        self.__session.commit()
 
     def delete(self, obj=None):
+        """
+        delete
+        """
         if obj:
             self.__session.delete(obj)
 
-    def save(self):
-        self.__session.commit()
-
-    def reload(self):
-        from models.base_model import Base
-        Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
-        Session = scoped_session(session_factory)
-        self.__session = Session()
-
     def close(self):
-        '''closes'''
-        self.__session.close()
+        """
+        close
+        """
+        self.__session.remove()
