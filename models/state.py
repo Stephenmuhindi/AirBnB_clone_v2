@@ -1,29 +1,35 @@
 #!/usr/bin/python3
-""" this thing is hanging """
-from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String
+'''
+the wonakear
+'''
+import os
+import models
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from models.city import City
-from os import getenv
-from models import storage_type
+from models.base_model import BaseModel, Base
 
 
 class State(BaseModel, Base):
-    """ State clthingy"""
-
-    if storage_type == "db":
-        __tablename__ = 'states'
+    '''
+    state thung
+    '''
+    __tablename__ = 'states'
+    if os.getenv("HBNB_TYPE_STORAGE") == "db":
         name = Column(String(128), nullable=False)
-        cities = relationship('City', cascade="all,delete", backref="state")
+        cities = relationship('City', cascade='all, delete-orphan',
+                               backref='state')
     else:
         name = ""
 
+    if os.getenv('HBNB_TYPE_STORAGE') == 'fs':
         @property
         def cities(self):
-            """getter thingy"""
-            citiesList = []
-            citiesAll = storage.all(City)
-            for city in citiesAll.values():
-                if city.state_id == self.id:
-                    citiesList.append(city)
-            return citiesList
+            """
+            Returns list
+            """
+            res = []
+            city_inst = models.storage.all(models.classes['City']).values()
+            for k in city_inst:
+                if k.state_id == self.id:
+                    res.append(k)
+            return res

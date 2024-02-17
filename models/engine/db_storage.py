@@ -1,82 +1,85 @@
 #!/usr/bin/python3
-"""user bana"""
+''' kisononoi'''
+import os
+from models.base_model import BaseModel, Base
+from sqlalchemy import MetaData
 from models.user import User
-from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
+from models.place import Place
 from models.review import Review
-from models.base_model import Base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from os import getenv
+from sqlalchemy import (create_engine)
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session
 
 
 class DBStorage:
-    """Class methodology"""
+
+    '''
+    db eb
+    '''
 
     __engine = None
     __session = None
 
     def __init__(self):
-        """init"""
-        hb_user = getenv("HBNB_MYSQL_USER")
-        hb_pwd = getenv("HBNB_MYSQL_PWD")
-        hb_host = getenv("HBNB_MYSQL_HOST")
-        hb_db = getenv("HBNB_MYSQL_DB")
-        hb_env = getenv("HBNB_ENV")
+        ''' engine '''
+        env = os.getenv('HBNB_ENV')
+        user = os.getenv('HBNB_MYSQL_USER')
+        pwd = os.getenv('HBNB_MYSQL_PWD')
+        host = os.getenv('HBNB_MYSQL_HOST')
+        db = os.getenv('HBNB_MYSQL_DB')
 
         self.__engine = create_engine(
-            f"mysql+mysqldb://{hb_user}:{hb_pwd}@{hb_host}/{hb_db}",
-            pool_pre_ping=True,
-        )
-
-        if hb_env == "test":
+            'mysql+mysqldb://{}:{}@{}/{}'.format(
+                user, pwd, host, db, pool_pre_ping=True))
+        Base.metadata.create_all(self.__engine)
+        if env == 'test':
             Base.metadata.drop_all(self.__engine)
 
-    def reload(self):
-        """ reload methodology """
-        Base.metadata.create_all(self.__engine)
-        Session = scoped_session(
-            sessionmaker(bind=self.__engine, expire_on_commit=False)
-        )
-        self.__session = Session
+        Session = sessionmaker(bind=self.__engine)
+        self.__session = Session()
 
     def all(self, cls=None):
-        """
-        all method
-        """
-        allClasses = [User, Place, State, City, Amenity, Review]
+        '''
+        if cls not specified, returns all classes
+        '''
         result = {}
-        if cls is not None:
-            for obj in self.__session.query(cls).all():
-                ClassName = obj.__class__.__name__
-                keyName = ClassName + "." + obj.id
-                result[keyName] = obj
+        if cls:
+            for obj in self.__session.query(eval(cls)).all():
+                key = "{}.{}".format(obj.__class__.__name__, obj.id)
+                result[key] = obj
         else:
-            for clss in allClasses:
-                for obj in self.__session.query(clss).all():
-                    ClassName = obj.__class__.__name__
-                    keyName = ClassName + "." + obj.id
-                    result[keyName] = obj
-        return result
+            for sub_c in Base.__subclasses__():
+                table = self.__session.query(sub_c).all()
+                for obj in table:
+                    key = "{}.{}".format(obj.__class__.__name__, obj.id)
+                    result[key] = obj
+        return(result)
 
     def new(self, obj):
-        """add object"""
         if obj:
-            self.__session.add(obj)
-
-    def save(self):
-        """save  changes"""
-        self.__session.commit()
+            try:
+                self.__session.add(obj)
+            except:
+                pass
 
     def delete(self, obj=None):
-        """delet sess"""
         if obj:
             self.__session.delete(obj)
 
+    def save(self):
+        self.__session.commit()
+
+    def reload(self):
+        from models.base_model import Base
+        Base.metadata.create_all(self.__engine)
+        session_factory = sessionmaker(bind=self.__engine,
+                                       expire_on_commit=False)
+        Session = scoped_session(session_factory)
+        self.__session = Session()
+
     def close(self):
-        """
-        the line change
-        """
-        self.__session.remove()
+        '''closes'''
+        self.__session.close()
