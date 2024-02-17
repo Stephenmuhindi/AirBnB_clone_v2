@@ -1,29 +1,29 @@
 #!/usr/bin/python3
-""" Sta airBNB project """
-from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship
-from models.city import City
+"""no circ import."""
+import models
 from os import getenv
-from models import storage_type
+from models.base_model import Base
+from models.base_model import BaseModel
+from models.city import City
+from sqlalchemy import Column
+from sqlalchemy import String
+from sqlalchemy.orm import relationship
 
 
 class State(BaseModel, Base):
-    """ Sate db """
+    """
+    Inherits from SQLAlchemy Base and links to db
+    """
+    __tablename__ = "states"
+    name = Column(String(128), nullable=False)
+    cities = relationship("City",  backref="state", cascade="delete")
 
-    if storage_type == "db":
-        __tablename__ = 'states'
-        name = Column(String(128), nullable=False)
-        cities = relationship('City', cascade="all,delete", backref="state")
-    else:
-        name = ""
-
+    if getenv("HBNB_TYPE_STORAGE") != "db":
         @property
         def cities(self):
-            """getter thingy"""
-            citiesList = []
-            citiesAll = storage.all(City)
-            for city in citiesAll.values():
+            """list of all related Cities."""
+            city_list = []
+            for city in list(models.storage.all(City).values()):
                 if city.state_id == self.id:
-                    citiesList.append(city)
-            return citiesList
+                    city_list.append(city)
+            return city_list

@@ -1,79 +1,65 @@
 #!/usr/bin/python3
-"""manage file storage for airbnbb clone"""
+"""FileStorage module."""
 import json
+from models.base_model import BaseModel
+from models.amenity import Amenity
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
 
 
 class FileStorage:
-    """manages storage of airbnb models in JSON"""
-    __file_path = 'file.json'
+    """
+    abstract engine
+    """
+
+    __file_path = "file.json"
     __objects = {}
 
-    @property
-    def cities(self):
-        """Retruns Cities in state"""
-
-    def delete(self, obj=None):
-        """
-        func doc
-        """
-        if obj:
-            id = obj.to_dict()["id"]
-            className = obj.to_dict()["__class__"]
-            keyName = className+"."+id
-            if keyName in FileStorage.__objects:
-                del (FileStorage.__objects[keyName])
-                self.save()
-
     def all(self, cls=None):
-        """Returnsmodelsge"""
-        print_dict = {}
-        if cls:
-            className = cls.__name__
-            for k, v in FileStorage.__objects.items():
-                if k.split('.')[0] == className:
-                    print_dict[k] = str(v)
-            return print_dict
-        else:
-            return FileStorage.__objects
+        """
+        Return a dict objects
+        """
+        if cls is not None:
+            if type(cls) == str:
+                cls = eval(cls)
+            cls_dict = {}
+            for k, v in self.__objects.items():
+                if type(v) == cls:
+                    cls_dict[k] = v
+            return cls_dict
+        return self.__objects
 
     def new(self, obj):
-        """Adds new objec"""
-        self.all().update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
+        """Set obj with key"""
+        self.__objects["{}.{}".format(type(obj).__name__, obj.id)] = obj
 
     def save(self):
-        """json dunp"""
-        with open(FileStorage.__file_path, 'w') as f:
-            temp = {}
-            temp.update(FileStorage.__objects)
-            for key, val in temp.items():
-                temp[key] = val.to_dict()
-            json.dump(temp, f)
+        """Serialize JSON."""
+        odict = {o: self.__objects[o].to_dict() for o in self.__objects.keys()}
+        with open(self.__file_path, "w", encoding="utf-8") as f:
+            json.dump(odict, f)
 
     def reload(self):
-        """Loads storage without circular import"""
-        from models.base_model import BaseModel
-        from models.user import User
-        from models.place import Place
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.review import Review
-        classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+        """Deserialize JSON."""
         try:
-            temp = {}
-            with open(FileStorage.__file_path, 'r') as f:
-                temp = json.load(f)
-                for key, val in temp.items():
-                    self.all()[key] = classes[val['__class__']](**val)
+            with open(self.__file_path, "r", encoding="utf-8") as f:
+                for o in json.load(f).values():
+                    name = o["__class__"]
+                    del o["__class__"]
+                    self.new(eval(name)(**o))
         except FileNotFoundError:
             pass
 
+    def delete(self, obj=None):
+        """Delete"""
+        try:
+            del self.__objects["{}.{}".format(type(obj).__name__, obj.id)]
+        except (AttributeError, KeyError):
+            pass
+
     def close(self):
-        """
-        the update
-        """
+        """Caupdate thing."""
         self.reload()
