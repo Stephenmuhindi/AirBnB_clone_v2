@@ -1,28 +1,30 @@
 #!/usr/bin/python3
 """
-mod def
+webtermis hanging
 """
-from models import storage
 from flask import Flask
-from flask import render_template
+from models import *
+from models import storage
 
 app = Flask(__name__)
 
 
-@app.route("/states_list", strict_slashes=False)
+@app.route('/states_list', strict_slashes=False)
 def states_list():
     """
-    States are sorted
+    Fucking hell
     """
-    states = storage.all("State")
-    return render_template("7-states_list.html", states=states)
+    states = sorted(list(storage.all("State").values()), key=lambda x: x.name)
+    return render_template('7-states_list.html', states=states)
 
 
 @app.teardown_appcontext
-def teardown(exc):
-    """exit sess."""
+def teardown_db(exception):
+    """
+    actual update
+    """
     storage.close()
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0"
+if __name__ == '__main__':
+    app.run(port='5000', host='0.0.0.0')
