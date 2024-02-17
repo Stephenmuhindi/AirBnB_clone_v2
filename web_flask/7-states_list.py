@@ -19,12 +19,11 @@ def states_list():
 
 
 @app.teardown_appcontext
-def teardown_db(exception):
+def teardown_db(exc):
     """
-    actual update
+    close sess
     """
     storage.close()
-
 
 if __name__ == '__main__':
     app.run(port='5000', host='0.0.0.0')
