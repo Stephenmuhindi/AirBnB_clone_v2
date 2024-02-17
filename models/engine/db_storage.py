@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-"""
-clone
-"""
+"""manage file storage for airbnb clone"""
 from models.user import User
 from models.place import Place
 from models.state import State
@@ -15,17 +13,13 @@ from os import getenv
 
 
 class DBStorage:
-    """
-    Class method
-    """
+    """db start"""
 
     __engine = None
     __session = None
 
     def __init__(self):
-        """
-        engine start
-        """
+        """Function Docs"""
         hb_user = getenv("HBNB_MYSQL_USER")
         hb_pwd = getenv("HBNB_MYSQL_PWD")
         hb_host = getenv("HBNB_MYSQL_HOST")
@@ -41,9 +35,7 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def reload(self):
-        """
-        reload methodoloy
-        """
+        """ reload methodology"""
         Base.metadata.create_all(self.__engine)
         Session = scoped_session(
             sessionmaker(bind=self.__engine, expire_on_commit=False)
@@ -52,7 +44,7 @@ class DBStorage:
 
     def all(self, cls=None):
         """
-        query all
+        ask for one or all
         """
         allClasses = [User, Place, State, City, Amenity, Review]
         result = {}
@@ -70,27 +62,21 @@ class DBStorage:
         return result
 
     def new(self, obj):
-        """
-        add new
-        """
+        """add new objec"""
         if obj:
             self.__session.add(obj)
 
     def save(self):
-        """
-        all changes
-        """
+        """push all changes"""
         self.__session.commit()
 
     def delete(self, obj=None):
-        """
-        delete
-        """
+        """delete from db """
         if obj:
             self.__session.delete(obj)
 
     def close(self):
         """
-        close
+        hekima kwa siri
         """
         self.__session.remove()
