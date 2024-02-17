@@ -7,9 +7,9 @@ from flask import Flask
 from flask import render_template
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
-
-@app.route('/states_list', strict_slashes=False)
+@app.route('/states_list')
 def states_list():
     """
     Fucking hell
