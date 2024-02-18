@@ -1,30 +1,30 @@
 #!/usr/bin/python3
 """flask web app"""
-from models import *
-from models.base_model import BaseModel, Base
-from models.user import User
-from models.place import Place
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.review import Review
 from flask import Flask, render_template
+from models import storage
+from models.state import State
+
+
 app = Flask(__name__)
-classes = {"Amenity": Amenity, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
+app.url_map.strict_slashes = False
 
 
-@app.route('/states_list', strict_slashes=False)
+@app.route('/states_list')
 def states_list():
-    """ display HTML"""
-    states = storage.all(classes["State"]).values()
-    return render_template('7-states_list.html', states=states)
+    '''state list'''
+    all_states = list(storage.all(State).values())
+    all_states.sort(key=lambda x: x.name)
+    ctxt = {
+        'states': all_states
+    }
+    return render_template('7-states_list.html', **ctxt)
 
 
 @app.teardown_appcontext
-def remove_SQLalc_session(exception):
-    """ close sess"""
+def flask_teardown(exc):
+    '''close sess'''
     storage.close()
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port='5000')
