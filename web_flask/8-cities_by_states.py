@@ -1,28 +1,26 @@
 #!/usr/bin/python3
-"""
-Mod def
-"""
-from flask import Flask
-from models import *
+"""Flask web app """
+from flask import Flask, render_template
 from models import storage
+from models.state import State
 
 app = Flask(__name__)
-
-
-@app.route('/cities_by_states', strict_slashes=False)
-def cities_by_states():
-    """state and cities in order"""
-    states = storage.all("State").values()
-    return render_template('8-cities_by_states.html', states=states)
+app.url_map.strict_slashes = False
 
 
 @app.teardown_appcontext
-def teardown_db(exception):
-    """
-    db teardown
-    """
+def dispose(exception):
+    """close sess"""
     storage.close()
 
 
+@app.route('/cities_by_states')
+def states():
+    """ ls states """
+    states = storage.all(State)
+    states_list = list(states.values())
+    return render_template('8-cities_by_states.html', states=states_list)
+
+
 if __name__ == '__main__':
-    app.run(port='5000', host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5000)
