@@ -1,26 +1,30 @@
 #!/usr/bin/python3
-"""flask web app"""
-from flask import Flask, render_template
+"""
+source info
+"""
+from flask import Flask
+from models import *
 from models import storage
-from models.state import State
 
 app = Flask(__name__)
-app.url_map.strict_slashes = False
+
+
+@app.route('/states_list', strict_slashes=False)
+def states_list():
+    """
+    statelist
+    """
+    states = sorted(list(storage.all("State").values()), key=lambda x: x.name)
+    return render_template('7-states_list.html', states=states)
 
 
 @app.teardown_appcontext
-def dispose(exception):
-    """ close sess"""
+def teardown_db(exception):
+    """
+    app teardown
+    """
     storage.close()
 
 
-@app.route('/states_list')
-def states():
-    """pr"int list """
-    states = storage.all(State)
-    states_list = list(states.values())
-    return render_template('7-states_list.html', states=states_list)
-
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(port='5000', host='0.0.0.0')
